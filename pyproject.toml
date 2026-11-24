@@ -12,7 +12,7 @@ dependencies = [
     "pyarrow",
     "fastapi",
     "requests",
-    "unstructured[pdf]",
+    "pymupdf",
 ]
 
 [project.optional-dependencies]

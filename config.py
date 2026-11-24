@@ -13,4 +13,6 @@ class Settings(BaseSettings):
     finance_bench_pdf_base_url: str
     request_row_length: int = 100
 
+    embedding_model_name: str
+
 settings = Settings()
