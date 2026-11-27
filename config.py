@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=Path(ROOT, ".env"))
 
@@ -14,5 +15,7 @@ class Settings(BaseSettings):
     request_row_length: int = 100
 
     embedding_model_name: str
+    database_url: str
+
 
 settings = Settings()

@@ -12,18 +12,12 @@ logger = logging.getLogger(__name__)
 class Embed:
     """Load an embedding model once, then count tokens and embed chunks and queries."""
 
-    def __init__(
-        self,
-        model_name: str = settings.embedding_model_name,
-        device: str | None = None,
-        query_prompt: str = ""
-    ):
+    def __init__(self, model_name: str = settings.embedding_model_name, device: str | None = None):
         cuda_ok = torch.cuda.is_available()
         if device not in ("cuda", "cpu"):
             logger.warning("Device %r not available, choosing automatically", device or "")
             device = "cuda" if cuda_ok else "cpu"
         self.device = device
-        self.query_prompt = query_prompt
 
         self.model = SentenceTransformer(model_name, device=self.device)
         self.tokenizer = self.model.tokenizer
@@ -36,7 +30,11 @@ class Embed:
         pooling = self._pooling_mode()
         logger.info(
             "Loaded %s on %s (pooling=%s, max_tokens=%d, dim=%d)",
-            model_name, self.device, pooling, self.max_tokens, self.dim,
+            model_name,
+            self.device,
+            pooling,
+            self.max_tokens,
+            self.dim,
         )
 
     def _pooling_mode(self) -> str | None:
@@ -54,11 +52,13 @@ class Embed:
         """Embed chunks. Returns float32 array of shape (len(texts), dim), rows normalized."""
         if not texts:
             return np.empty((0, self.dim), dtype=np.float32)
-        too_long = sum(self.count_tokens(t) > self.max_chunk_tokens for t in texts)
-        if too_long:
+        too_long_texts = sum(self.count_tokens(t) > self.max_chunk_tokens for t in texts)
+        if too_long_texts:
             logger.warning(
                 "%d of %d texts exceed %d tokens and will be truncated",
-                too_long, len(texts), self.max_chunk_tokens,
+                too_long_texts,
+                len(texts),
+                self.max_chunk_tokens,
             )
         return self.model.encode_document(
             texts,
@@ -69,8 +69,4 @@ class Embed:
 
     def embed_query(self, text: str) -> np.ndarray:
         """Embed one search query with the model's query prompt. Returns shape (dim,)."""
-        return self.model.encode_query(
-            text,
-            prompt=self.query_prompt,
-            normalize_embeddings=True
-        )
+        return self.model.encode_query(text, normalize_embeddings=True)

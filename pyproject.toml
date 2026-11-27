@@ -13,6 +13,9 @@ dependencies = [
     "fastapi",
     "requests",
     "pymupdf",
+    "psycopg[binary]",
+    "pgvector",
+    "tqdm",
 ]
 
 [project.optional-dependencies]
